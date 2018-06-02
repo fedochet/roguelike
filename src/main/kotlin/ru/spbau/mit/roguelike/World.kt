@@ -13,15 +13,16 @@ class World(private val tiles: Array<Array<Tile>>) {
 class WorldBuilder(private val width: Int, private val height: Int) {
     private var tiles = Array(width, { Array(height, { Tile.BOUNDS }) })
 
+    private val mapCoordinates = (0 until width) product (0 until height)
+
     fun build() = World(tiles)
 
     fun makeCaves(): WorldBuilder = randomizeTiles().smooth(8)
 
     private fun randomizeTiles(): WorldBuilder {
-        for (i in 0 until width) {
-            for (j in 0 until height) {
-                tiles[i][j] = if (Math.random() > 0.5) Tile.FLOOR else Tile.WALL
-            }
+
+        for ((x, y) in mapCoordinates) {
+            tiles[x][y] = if (Math.random() > 0.5) Tile.FLOOR else Tile.WALL
         }
 
         return this
@@ -30,33 +31,34 @@ class WorldBuilder(private val width: Int, private val height: Int) {
     private fun smooth(times: Int): WorldBuilder {
         val tempTiles = Array(width, { Array(height, { Tile.BOUNDS }) })
 
-        for (time in 0 until times) {
+        repeat(times) {
+            for ((x, y) in mapCoordinates) {
+                var floors = 0
+                var rocks = 0
 
-            for (x in 0 until width) {
-                for (y in 0 until height) {
-                    var floors = 0
-                    var rocks = 0
+                for ((ox, oy) in -1..1 product -1..1) {
+                    if (!validCoordinates(x + ox, y + oy))
+                        continue
 
-                    for (ox in -1..1) {
-                        for (oy in -1..1) {
-                            if (x + ox < 0 || x + ox >= width || y + oy < 0 || y + oy >= height)
-                                continue
-
-                            if (tiles[x + ox][y + oy] == Tile.FLOOR) {
-                                floors++
-                            } else {
-                                rocks++
-                            }
-                        }
+                    if (tiles[x + ox][y + oy] == Tile.FLOOR) {
+                        floors++
+                    } else {
+                        rocks++
                     }
-
-                    tempTiles[x][y] = if (floors >= rocks) Tile.FLOOR else Tile.WALL
                 }
+
+                tempTiles[x][y] = if (floors >= rocks) Tile.FLOOR else Tile.WALL
             }
+
             tiles = tempTiles
         }
 
         return this
     }
 
+    private fun validCoordinates(x: Int, y: Int): Boolean {
+        return (x in 0 until width) && (y in 0 until height)
+    }
 }
+
+private infix fun <T, K> Iterable<T>.product(other: Iterable<K>) = this.flatMap { i -> other.map { i to it } }
