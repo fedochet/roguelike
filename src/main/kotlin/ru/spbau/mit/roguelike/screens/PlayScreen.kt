@@ -3,8 +3,10 @@ package ru.spbau.mit.roguelike.screens
 import asciiPanel.AsciiPanel
 import ru.spbau.mit.roguelike.World
 import ru.spbau.mit.roguelike.WorldBuilder
+import ru.spbau.mit.roguelike.util.product
 import java.awt.event.KeyEvent
-import java.lang.Math.*
+import java.lang.Math.max
+import java.lang.Math.min
 
 class PlayScreen : Screen {
 
@@ -12,6 +14,8 @@ class PlayScreen : Screen {
     private var centerY: Int = 0
     private val screenWidth: Int = 80
     private val screenHeight: Int = 21
+
+    private val screenCoordinates = (0 until screenWidth) product (0 until screenHeight)
 
     private val world: World = WorldBuilder(90, 30).makeCaves().build()
 
@@ -48,13 +52,11 @@ class PlayScreen : Screen {
     }
 
     private fun displayTiles(terminal: AsciiPanel, left: Int, top: Int) {
-        for (x in 0 until screenWidth) {
-            for (y in 0 until screenHeight) {
-                val wx = x + left
-                val wy = y + top
+        for ((x, y) in screenCoordinates) {
+            val wx = x + left
+            val wy = y + top
 
-                terminal.write(world.getGlyph(wx, wy), x, y, world.getColor(wx, wy))
-            }
+            terminal.write(world.getGlyph(wx, wy), x, y, world.getColor(wx, wy))
         }
     }
 

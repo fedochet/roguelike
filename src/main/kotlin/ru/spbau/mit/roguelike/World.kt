@@ -1,5 +1,7 @@
 package ru.spbau.mit.roguelike
 
+import ru.spbau.mit.roguelike.util.product
+
 class World(private val tiles: Array<Array<Tile>>) {
     val width = tiles.size
     val height = tiles[0].size
@@ -60,5 +62,3 @@ class WorldBuilder(private val width: Int, private val height: Int) {
         return (x in 0 until width) && (y in 0 until height)
     }
 }
-
-private infix fun <T, K> Iterable<T>.product(other: Iterable<K>) = this.flatMap { i -> other.map { i to it } }
