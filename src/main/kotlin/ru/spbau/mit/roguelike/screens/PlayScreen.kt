@@ -3,11 +3,8 @@ package ru.spbau.mit.roguelike.screens
 import asciiPanel.AsciiPanel
 import ru.spbau.mit.roguelike.entities.Creature
 import ru.spbau.mit.roguelike.entities.CreatureFactory
-import ru.spbau.mit.roguelike.entities.MessagesHub
 import ru.spbau.mit.roguelike.util.product
-import ru.spbau.mit.roguelike.world.FieldOfView
-import ru.spbau.mit.roguelike.world.World
-import ru.spbau.mit.roguelike.world.WorldBuilder
+import ru.spbau.mit.roguelike.world.*
 import java.awt.Color
 import java.awt.event.KeyEvent
 import java.lang.Math.max
@@ -29,7 +26,19 @@ class PlayScreen : Screen {
     init {
         val factory = CreatureFactory(world)
         player = factory.newPlayer(fieldOfView, messagesHub)
+        addEnemies(factory)
+        addItems(StuffFactory(world))
+    }
 
+    private fun addItems(stuffFactory: StuffFactory) {
+        repeat(world.depth) { z ->
+            repeat((world.width * world.height) / 20) {
+                stuffFactory.newRock(z)
+            }
+        }
+    }
+
+    private fun addEnemies(factory: CreatureFactory) {
         repeat(world.depth) { z ->
             repeat(7) {
                 factory.newFungus(z)
@@ -52,8 +61,8 @@ class PlayScreen : Screen {
     }
 
     private fun displayMessages(terminal: AsciiPanel) {
-        val top = screenHeight - messagesHub.messages.size + 1
-        messagesHub.messages.forEachIndexed { i, message ->
+        val top = screenHeight - messagesHub.size + 1
+        messagesHub.forEachIndexed { i, message ->
             terminal.writeCenter(message, top - i)
         }
 
