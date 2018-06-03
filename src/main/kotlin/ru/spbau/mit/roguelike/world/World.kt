@@ -5,6 +5,8 @@ import ru.spbau.mit.roguelike.Tile.BOUNDS
 import ru.spbau.mit.roguelike.Tile.FLOOR
 import ru.spbau.mit.roguelike.entities.Creature
 import java.awt.Color
+import java.util.*
+
 
 class World(private val tiles: Array<Array<Array<Tile>>>) {
     val width = tiles.size
@@ -68,6 +70,40 @@ class World(private val tiles: Array<Array<Array<Tile>>>) {
     fun update() {
         for (creature in creatures.toList()) {
             creature.update()
+        }
+    }
+
+    fun removeItem(x: Int, y: Int, z: Int) {
+        items[x][y][z] = null
+    }
+
+    fun addAtEmptySpace(item: Item?, x: Int, y: Int, z: Int) {
+        if (item == null)
+            return
+
+        val points = ArrayList<Point>()
+        val checked = ArrayList<Point>()
+
+        points.add(Point(x, y, z))
+
+        while (!points.isEmpty()) {
+            val p = points.removeAt(0)
+            checked.add(p)
+
+            if (!getTile(p.x, p.y, p.z).steppable)
+                continue
+
+            if (items[p.x][p.y][p.z] == null) {
+                items[p.x][p.y][p.z] = item
+                val c = this.getCreatureAt(p.x, p.y, p.z)
+                if (c != null)
+                    c.notify("A %s lands between your feet.", item.name)
+                return
+            } else {
+                val neighbors = p.neighbors8()
+                neighbors.removeAll(checked)
+                points.addAll(neighbors)
+            }
         }
     }
 }

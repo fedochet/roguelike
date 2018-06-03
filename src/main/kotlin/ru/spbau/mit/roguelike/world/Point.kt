@@ -6,7 +6,7 @@ import java.util.*
 
 data class Point(val x: Int, val y: Int, val z: Int)
 
-fun Point.neighbors8(): List<Point> {
+fun Point.neighbors8(): MutableList<Point> {
     val points = ArrayList<Point>()
 
     for ((ox, oy) in squareAreaCoordinates(radius = 1)) {

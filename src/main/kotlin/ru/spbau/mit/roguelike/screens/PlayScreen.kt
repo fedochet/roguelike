@@ -93,6 +93,7 @@ class PlayScreen : Screen {
         }
 
         when (key.keyChar) {
+            ',', 'g' -> player.pickup()
             '<' -> player.moveBy(0, 0, -1)
             '>' -> player.moveBy(0, 0, 1)
         }

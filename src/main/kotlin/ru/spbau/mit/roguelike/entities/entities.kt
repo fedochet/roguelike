@@ -3,6 +3,7 @@ package ru.spbau.mit.roguelike.entities
 import ru.spbau.mit.roguelike.Tile
 import ru.spbau.mit.roguelike.util.roundAreaCoordinates
 import ru.spbau.mit.roguelike.world.FieldOfView
+import ru.spbau.mit.roguelike.world.Item
 import ru.spbau.mit.roguelike.world.MessagesHub
 import ru.spbau.mit.roguelike.world.World
 import java.awt.Color
@@ -22,6 +23,7 @@ class Creature(
 
     var hp = maxHp
     var ai: CreatureAI = DummyAI(this)
+    val inventory = Inventory(20)
 
     fun canSee(wx: Int, wy: Int, wz: Int): Boolean {
         return ai.canSee(wx, wy, wz)
@@ -65,6 +67,24 @@ class Creature(
         other.modifyHp(-amount)
 
         doAction("attack the '%s' for %d damage", other.name, amount)
+    }
+
+    fun pickup() {
+        val item = world.getItem(x, y, z)
+
+        if (inventory.isFull() || item == null) {
+            doAction("grab at the ground")
+        } else {
+            doAction("pickup a %s", item.name)
+            world.removeItem(x, y, z)
+            inventory.add(item)
+        }
+    }
+
+    fun drop(item: Item) {
+        doAction("drop a " + item.name)
+        inventory.remove(item)
+        world.addAtEmptySpace(item, x, y, z)
     }
 
     fun modifyHp(amount: Int) {
