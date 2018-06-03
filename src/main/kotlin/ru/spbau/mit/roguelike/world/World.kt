@@ -81,8 +81,8 @@ class World(private val tiles: Array<Array<Array<Tile>>>) {
         if (item == null)
             return
 
-        val points = ArrayList<Point>()
-        val checked = ArrayList<Point>()
+        val points = mutableListOf<Point>()
+        val checked = mutableListOf<Point>()
 
         points.add(Point(x, y, z))
 
@@ -95,10 +95,7 @@ class World(private val tiles: Array<Array<Array<Tile>>>) {
 
             if (items[p.x][p.y][p.z] == null) {
                 items[p.x][p.y][p.z] = item
-                val c = this.getCreatureAt(p.x, p.y, p.z)
-                if (c != null)
-                    c.notify("A %s lands between your feet.", item.name)
-                return
+                getCreatureAt(p.x, p.y, p.z)?.notify("A %s lands between your feet.", item.name)
             } else {
                 val neighbors = p.neighbors8()
                 neighbors.removeAll(checked)

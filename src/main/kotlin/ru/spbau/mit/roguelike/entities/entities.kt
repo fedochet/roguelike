@@ -9,7 +9,6 @@ import ru.spbau.mit.roguelike.world.World
 import java.awt.Color
 import kotlin.math.min
 
-
 class Creature(
         private val world: World,
         val name: String,
