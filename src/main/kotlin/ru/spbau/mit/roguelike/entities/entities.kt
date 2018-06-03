@@ -2,6 +2,7 @@ package ru.spbau.mit.roguelike.entities
 
 import ru.spbau.mit.roguelike.Tile
 import ru.spbau.mit.roguelike.World
+import ru.spbau.mit.roguelike.util.roundAreaCoordinates
 import java.awt.Color
 
 abstract class CreatureAI(protected val creature: Creature) {
@@ -77,20 +78,31 @@ class Creature(
         amount = (Math.random() * amount).toInt() + 1
         other.modifyHp(-amount)
 
-        notify("You attack the '%s' for %d damage.", other.glyph, amount)
-        other.notify("The '%s' attacks you for %d damage.", glyph, amount)
+        doAction("attack the '%s' for %d damage", other.glyph, amount)
     }
 
     fun modifyHp(amount: Int) {
         hp += amount
 
         if (hp <= 0) {
+            doAction("die")
             world.removeCreature(this)
         }
     }
 
     fun notify(message: String, vararg params: Any) {
         ai.onNotify(message.format(*params))
+    }
+
+    fun doAction(message: String, vararg params: Any) {
+        for ((ox, oy) in roundAreaCoordinates(radius = 9)) {
+            val other = world.getCreatureAt(x + ox, y + oy) ?: continue
+
+            when (other) {
+                this -> other.notify("You $message.", *params)
+                else -> other.notify("The '$glyph' $message.", *params)
+            }
+        }
     }
 
     fun dig(x: Int, y: Int) = world.dig(x, y)

@@ -3,6 +3,7 @@ package ru.spbau.mit.roguelike
 import ru.spbau.mit.roguelike.Tile.*
 import ru.spbau.mit.roguelike.entities.Creature
 import ru.spbau.mit.roguelike.util.product
+import ru.spbau.mit.roguelike.util.squareAreaCoordinates
 
 class World(private val tiles: Array<Array<Tile>>) {
     val width = tiles.size
@@ -65,7 +66,7 @@ class WorldBuilder(private val width: Int, private val height: Int) {
                 var floors = 0
                 var rocks = 0
 
-                for ((ox, oy) in -1..1 product -1..1) {
+                for ((ox, oy) in squareAreaCoordinates(radius = 1)) {
                     if (!validCoordinates(x + ox, y + oy))
                         continue
 

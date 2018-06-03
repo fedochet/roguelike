@@ -45,7 +45,7 @@ class PlayScreen : Screen {
     private fun displayMessages(terminal: AsciiPanel) {
         val top = screenHeight - messagesHub.messages.size + 1
         messagesHub.messages.forEachIndexed { i, message ->
-            terminal.writeCenter(message, top + i)
+            terminal.writeCenter(message, top - i)
         }
 
         messagesHub.clear()
