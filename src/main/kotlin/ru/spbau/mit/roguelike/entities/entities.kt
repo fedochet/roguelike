@@ -1,17 +1,17 @@
 package ru.spbau.mit.roguelike.entities
 
 import ru.spbau.mit.roguelike.Tile
-import ru.spbau.mit.roguelike.World
 import ru.spbau.mit.roguelike.util.roundAreaCoordinates
+import ru.spbau.mit.roguelike.world.World
 import java.awt.Color
 
 abstract class CreatureAI(protected val creature: Creature) {
-    abstract fun onEnter(x: Int, y: Int, tile: Tile)
+    abstract fun onEnter(x: Int, y: Int, z: Int, tile: Tile)
     open fun onNotify(message: String) {}
 }
 
 open class DummyAI(creature: Creature) : CreatureAI(creature) {
-    override fun onEnter(x: Int, y: Int, tile: Tile) {}
+    override fun onEnter(x: Int, y: Int, z: Int, tile: Tile) {}
 }
 
 class MessagesHub {
@@ -27,14 +27,15 @@ class PlayerAI(player: Creature, private val messages: MessagesHub): CreatureAI(
         player.ai = this
     }
 
-    override fun onEnter(x: Int, y: Int, tile: Tile) {
+    override fun onEnter(x: Int, y: Int, z: Int, tile: Tile) {
         when {
             tile.steppable -> {
                 creature.x = x
                 creature.y = y
+                creature.z = z
             }
 
-            tile.diggable -> creature.dig(x, y)
+            tile.diggable -> creature.dig(x, y, z)
         }
     }
 
@@ -53,23 +54,43 @@ class Creature(
         private val attackValue: Int,
         private val defenseValue: Int,
         var x: Int = 0,
-        var y: Int = 0) {
+        var y: Int = 0,
+        var z: Int = 0) {
 
     var hp = maxHp
 
 
     var ai: CreatureAI = DummyAI(this)
 
-    fun moveBy(mx: Int, my: Int) {
+    fun moveBy(mx: Int, my: Int, mz: Int) {
         val nextX = x + mx
         val nextY = y + my
+        val nextZ = z + mz
 
-        val other = world.getCreatureAt(nextX, nextY)
+        val tile = world.getTile(nextX, nextY, nextZ)
+
+        if (mz == -1) {
+            if (tile == Tile.STAIRS_DOWN) {
+                doAction("walk up the stairs to level %d", z + mz + 1);
+            } else {
+                doAction("try to go up but are stopped by the cave ceiling");
+                return
+            }
+        } else if (mz == 1) {
+            if (tile == Tile.STAIRS_UP) {
+                doAction("walk down the stairs to level %d", z + mz + 1);
+            } else {
+                doAction("try to go down but are stopped by the cave floor");
+                return
+            }
+        }
+
+        val other = world.getCreatureAt(nextX, nextY, nextZ)
 
         if (other != null) {
             attack(other)
         } else {
-            ai.onEnter(nextX, nextY, world.getTile(nextX, nextY))
+            ai.onEnter(nextX, nextY, nextZ, tile)
         }
     }
 
@@ -96,7 +117,7 @@ class Creature(
 
     fun doAction(message: String, vararg params: Any) {
         for ((ox, oy) in roundAreaCoordinates(radius = 9)) {
-            val other = world.getCreatureAt(x + ox, y + oy) ?: continue
+            val other = world.getCreatureAt(x + ox, y + oy, z) ?: continue
 
             when (other) {
                 this -> other.notify("You $message.", *params)
@@ -105,7 +126,7 @@ class Creature(
         }
     }
 
-    fun dig(x: Int, y: Int) = world.dig(x, y)
+    fun dig(x: Int, y: Int, z: Int) = world.dig(x, y, z)
 }
 
 class CreatureFactory(private val world: World) {

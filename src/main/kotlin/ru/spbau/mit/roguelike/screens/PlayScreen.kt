@@ -1,12 +1,12 @@
 package ru.spbau.mit.roguelike.screens
 
 import asciiPanel.AsciiPanel
-import ru.spbau.mit.roguelike.World
-import ru.spbau.mit.roguelike.WorldBuilder
 import ru.spbau.mit.roguelike.entities.Creature
 import ru.spbau.mit.roguelike.entities.CreatureFactory
 import ru.spbau.mit.roguelike.entities.MessagesHub
 import ru.spbau.mit.roguelike.util.product
+import ru.spbau.mit.roguelike.world.World
+import ru.spbau.mit.roguelike.world.WorldBuilder
 import java.awt.event.KeyEvent
 import java.lang.Math.max
 import java.lang.Math.min
@@ -19,7 +19,7 @@ class PlayScreen : Screen {
 
     private val screenCoordinates = (0 until screenWidth) product (0 until screenHeight)
 
-    private val world: World = WorldBuilder(90, 30).makeCaves().build()
+    private val world: World = WorldBuilder(90, 30, 5).makeCaves().build()
     private val messagesHub = MessagesHub()
     private val player: Creature
 
@@ -74,6 +74,11 @@ class PlayScreen : Screen {
             KeyEvent.VK_DOWN -> scrollBy(0, 1)
         }
 
+        when (key.keyChar) {
+            '<' -> player.moveBy(0, 0, -1)
+            '>' -> player.moveBy(0, 0, 1)
+        }
+
         return when (key.keyCode) {
             KeyEvent.VK_ESCAPE -> LoseScreen()
             KeyEvent.VK_ENTER -> WinScreen()
@@ -94,11 +99,13 @@ class PlayScreen : Screen {
             val wx = x + left
             val wy = y + top
 
-            terminal.write(world.getGlyph(wx, wy), x, y, world.getColor(wx, wy))
+            terminal.write(world.getGlyph(wx, wy, player.z), x, y, world.getColor(wx, wy, player.z))
         }
 
         for (creature in world.creatures) {
-            terminal.drawCreature(creature, left, top)
+            if (creature.z == player.z) {
+                terminal.drawCreature(creature, left, top)
+            }
         }
     }
 
@@ -107,7 +114,7 @@ class PlayScreen : Screen {
     }
 
     private fun scrollBy(mx: Int, my: Int) {
-        player.moveBy(mx, my)
+        player.moveBy(mx, my, 0)
     }
 
 }
