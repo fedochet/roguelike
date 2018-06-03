@@ -4,7 +4,7 @@ import ru.spbau.mit.roguelike.util.squareAreaCoordinates
 import java.util.*
 
 
-data class Point(@JvmField val x: Int, @JvmField val y: Int, @JvmField val z: Int)
+data class Point(val x: Int, val y: Int, val z: Int)
 
 fun Point.neighbors8(): List<Point> {
     val points = ArrayList<Point>()
