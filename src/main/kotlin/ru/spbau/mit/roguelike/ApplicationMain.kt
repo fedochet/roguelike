@@ -27,7 +27,7 @@ class ApplicationMain : JFrame(), KeyListener {
     }
 
     override fun keyPressed(e: KeyEvent) {
-        screen = screen.respondToUserInput(e)
+        screen = screen.respondToUserInput(e) ?: screen
         repaint()
     }
 

@@ -169,10 +169,25 @@ class WorldBuilder(private val width: Int, private val height: Int, private val 
         return candidates
     }
 
+    private fun addExitStairs(): WorldBuilder {
+        var x = -1
+        var y = -1
+
+        do {
+            x = (Math.random() * width).toInt()
+            y = (Math.random() * height).toInt()
+        } while (tiles[x][y][0] !== Tile.FLOOR)
+
+        tiles[x][y][0] = Tile.STAIRS_UP
+        return this
+    }
+
+
     fun makeCaves(): WorldBuilder {
         return randomizeTiles()
                 .smooth(8)
                 .createRegions()
                 .connectRegions()
+                .addExitStairs()
     }
 }

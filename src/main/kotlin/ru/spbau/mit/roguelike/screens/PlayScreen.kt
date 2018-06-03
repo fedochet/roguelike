@@ -1,6 +1,7 @@
 package ru.spbau.mit.roguelike.screens
 
 import asciiPanel.AsciiPanel
+import ru.spbau.mit.roguelike.Tile
 import ru.spbau.mit.roguelike.entities.Creature
 import ru.spbau.mit.roguelike.entities.CreatureFactory
 import ru.spbau.mit.roguelike.util.product
@@ -12,6 +13,8 @@ import java.lang.Math.min
 
 
 class PlayScreen : Screen {
+
+    private var subscreen: Screen? = null
 
     private val screenWidth: Int = 80
     private val screenHeight: Int = 21
@@ -30,12 +33,14 @@ class PlayScreen : Screen {
         addItems(StuffFactory(world))
     }
 
-    private fun addItems(stuffFactory: StuffFactory) {
+    private fun addItems(factory: StuffFactory) {
         repeat(world.depth) { z ->
             repeat((world.width * world.height) / 20) {
-                stuffFactory.newRock(z)
+                factory.newRock(z)
             }
         }
+
+        factory.newVictoryItem(world.depth - 1);
     }
 
     private fun addEnemies(factory: CreatureFactory) {
@@ -50,6 +55,11 @@ class PlayScreen : Screen {
     }
 
     override fun displayOutput(terminal: AsciiPanel) {
+        subscreen?.let {
+            it.displayOutput(terminal)
+            return
+        }
+
         val left = getScrollX()
         val top = getScrollY()
 
@@ -85,16 +95,29 @@ class PlayScreen : Screen {
     }
 
     override fun respondToUserInput(key: KeyEvent): Screen {
+        subscreen?.let {
+            subscreen = it.respondToUserInput(key)
+            return this
+        }
+
         when (key.keyCode) {
             KeyEvent.VK_RIGHT -> scrollBy(1, 0)
             KeyEvent.VK_LEFT -> scrollBy(-1, 0)
             KeyEvent.VK_UP -> scrollBy(0, -1)
             KeyEvent.VK_DOWN -> scrollBy(0, 1)
+            KeyEvent.VK_D -> subscreen = DropScreen(player)
         }
 
         when (key.keyChar) {
             ',', 'g' -> player.pickup()
-            '<' -> player.moveBy(0, 0, -1)
+
+            '<' -> {
+                if (userIsTryingToExit())
+                    return userExits();
+
+                player.moveBy(0, 0, -1);
+            }
+
             '>' -> player.moveBy(0, 0, 1)
         }
 
@@ -104,12 +127,22 @@ class PlayScreen : Screen {
             return LoseScreen()
         }
 
-        return when (key.keyCode) {
-            KeyEvent.VK_ESCAPE -> LoseScreen()
-            KeyEvent.VK_ENTER -> WinScreen()
-            else -> this
-        }
+        return this
     }
+
+    private fun userIsTryingToExit(): Boolean {
+        return player.z == 0 && world.getTile(player.x, player.y, player.z) === Tile.STAIRS_UP
+    }
+
+    private fun userExits(): Screen {
+        for (item in player.inventory.items) {
+            if (item != null && item.name == "Zachetka")
+                return WinScreen()
+        }
+
+        return LoseScreen()
+    }
+
 
     private fun getScrollX(): Int {
         return (player.x - screenWidth / 2).keepInRange(0, world.width - screenWidth)
