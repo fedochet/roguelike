@@ -35,8 +35,17 @@ class PlayScreen : Screen {
 
     private fun addItems(factory: StuffFactory) {
         repeat(world.depth) { z ->
-            repeat((world.width * world.height) / 20) {
+            repeat((world.width * world.height) / 80) {
                 factory.newRock(z)
+            }
+
+            repeat((world.width * world.height) / 100) {
+                factory.randomArmor(z)
+                factory.randomWeapon(z)
+            }
+
+            repeat((world.width * world.height) / 50) {
+                factory.newPotion(z)
             }
         }
 
@@ -48,7 +57,7 @@ class PlayScreen : Screen {
             repeat(7) {
                 factory.newFungus(z)
             }
-            repeat(40) {
+            repeat(10) {
                 factory.newBat(z)
             }
         }
@@ -106,6 +115,8 @@ class PlayScreen : Screen {
             KeyEvent.VK_UP -> scrollBy(0, -1)
             KeyEvent.VK_DOWN -> scrollBy(0, 1)
             KeyEvent.VK_D -> subscreen = DropScreen(player)
+            KeyEvent.VK_W -> subscreen = EquipScreen(player)
+            KeyEvent.VK_E -> subscreen = EatScreen(player)
         }
 
         when (key.keyChar) {
@@ -136,7 +147,7 @@ class PlayScreen : Screen {
 
     private fun userExits(): Screen {
         for (item in player.inventory.items) {
-            if (item != null && item.name == "Zachetka")
+            if (item != null && item.name == ZACHETKA.name)
                 return WinScreen()
         }
 

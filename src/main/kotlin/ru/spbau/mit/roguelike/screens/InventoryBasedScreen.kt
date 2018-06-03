@@ -17,7 +17,7 @@ abstract class InventoryBasedScreen(protected var player: Creature) : Screen {
         get() {
             val lines = ArrayList<String>()
             val inventory = player.inventory.items
-
+1
             for (i in inventory.indices) {
                 val item = inventory[i]
 

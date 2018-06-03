@@ -7,6 +7,8 @@ import ru.spbau.mit.roguelike.world.Item
 import ru.spbau.mit.roguelike.world.MessagesHub
 import ru.spbau.mit.roguelike.world.World
 import java.awt.Color
+import kotlin.math.min
+
 
 class Creature(
         private val world: World,
@@ -14,20 +16,76 @@ class Creature(
         val glyph: Char,
         val color: Color,
         val maxHp: Int,
-        private val attackValue: Int,
-        private val defenseValue: Int,
-        val visionRadius: Int,
-        var x: Int = 0,
-        var y: Int = 0,
-        var z: Int = 0) {
+        private val initialAttackValue: Int,
+        private val initialDefenceValue: Int,
+        val visionRadius: Int) {
+
+    var x: Int = 0
+    var y: Int = 0
+    var z: Int = 0
+
+
+    private var weapon: Item? = null
+    private var armor: Item? = null
+
+    private val attackValue get() = initialAttackValue + (weapon?.attackValue ?: 0)
+    private val defenseValue get() = initialDefenceValue + (weapon?.defenseValue ?: 0)
 
     var hp = maxHp
+        set(value) {
+            field = min(value, maxHp)
+            if (field <= 0) {
+                die()
+            }
+        }
+
     var ai: CreatureAI = DummyAI(this)
     val inventory = Inventory(20)
 
     fun canSee(wx: Int, wy: Int, wz: Int): Boolean {
         return ai.canSee(wx, wy, wz)
     }
+
+    fun unequip(item: Item?) {
+        val actualItem = item ?: return
+
+        if (actualItem === armor) {
+            doAction("remove a " + actualItem.name)
+            armor = null
+        } else if (actualItem === weapon) {
+            doAction("put away a " + actualItem.name)
+            weapon = null
+        }
+    }
+
+    fun equip(item: Item) {
+        if (item.attackValue == 0 && item.defenseValue == 0)
+            return
+
+        if (item.attackValue >= item.defenseValue) {
+            unequip(weapon)
+            doAction("wield a " + item.name)
+            weapon = item
+        } else {
+            unequip(armor)
+            doAction("put on a " + item.name)
+            armor = item
+        }
+    }
+
+    fun eat(item: Item) {
+        if (item.foodValue <= 0)
+            notify("Cannot eat that!")
+
+        val previousHp = hp
+        hp += item.foodValue
+
+        doAction("eat ${item.name}, recover ${hp - previousHp} health")
+
+        inventory.remove(item)
+        unequip(item)
+    }
+
 
     fun moveBy(mx: Int, my: Int, mz: Int) {
         val nextX = x + mx
@@ -64,7 +122,8 @@ class Creature(
     fun attack(other: Creature) {
         var amount = Math.max(0, attackValue - other.defenseValue)
         amount = (Math.random() * amount).toInt() + 1
-        other.modifyHp(-amount)
+
+        other.hp -= amount
 
         doAction("attack the '%s' for %d damage", other.name, amount)
     }
@@ -83,17 +142,14 @@ class Creature(
 
     fun drop(item: Item) {
         doAction("drop a " + item.name)
+        unequip(item)
         inventory.remove(item)
         world.addAtEmptySpace(item, x, y, z)
     }
 
-    fun modifyHp(amount: Int) {
-        hp += amount
-
-        if (hp <= 0) {
-            doAction("die")
-            world.removeCreature(this)
-        }
+    private fun die() {
+        doAction("die")
+        world.removeCreature(this)
     }
 
     fun notify(message: String, vararg params: Any) {
@@ -127,25 +183,25 @@ class CreatureFactory(private val world: World) {
         val player = Creature(
                 world, "Player", '@', Color.WHITE,
                 maxHp = 10,
-                attackValue = 20,
-                defenseValue = 5,
+                initialAttackValue = 20,
+                initialDefenceValue = 5,
                 visionRadius = 9
         )
-        world.addToEmptyLocation(player, 0)
+        world.addAtEmptyLocation(player, 0)
         PlayerAI(player, fieldOfView, messages)
         return player
     }
 
     fun newFungus(level: Int): Creature {
         val fungus = Creature(world, "Fungus", 'f', Color.GREEN, 10, 0, 0, 0)
-        world.addToEmptyLocation(fungus, level)
+        world.addAtEmptyLocation(fungus, level)
         FungusAI(fungus)
         return fungus
     }
 
     fun newBat(level: Int): Creature {
         val bat = Creature(world, "Bat", 'b', Color.YELLOW, 15, 5, 0, 0)
-        world.addToEmptyLocation(bat, level)
+        world.addAtEmptyLocation(bat, level)
         BatAI(bat)
         return bat
     }
