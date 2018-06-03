@@ -11,8 +11,8 @@ class World(private val tiles: Array<Array<Array<Tile>>>) {
 
     val creatures: MutableList<Creature> = mutableListOf()
 
-    fun getGlyph(x: Int, y: Int, z: Int) = getTile(x, y, z).glyph
-    fun getColor(x: Int, y: Int, z: Int) = getTile(x, y, z).color
+    fun getGlyph(x: Int, y: Int, z: Int) = getCreatureAt(x, y, z)?.glyph ?: getTile(x, y, z).glyph
+    fun getColor(x: Int, y: Int, z: Int) = getCreatureAt(x, y, z)?.color ?: getTile(x, y, z).color
 
     fun getTile(x: Int, y: Int, z: Int) = tiles.getOrNull(x)?.getOrNull(y)?.getOrNull(z) ?: BOUNDS
 

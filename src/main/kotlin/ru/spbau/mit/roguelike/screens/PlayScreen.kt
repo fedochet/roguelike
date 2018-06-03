@@ -110,12 +110,6 @@ class PlayScreen : Screen {
                 terminal.write(fieldOfView.tile(wx, wy, player.z).glyph, x, y, Color.DARK_GRAY)
             }
         }
-
-        for (creature in world.creatures) {
-            if (player.canSee(creature.x, creature.y, creature.z)) {
-                terminal.drawCreature(creature, left, top)
-            }
-        }
     }
 
     private fun onScreenCoordinates(x: Int, y: Int): Boolean {
