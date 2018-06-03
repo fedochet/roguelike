@@ -4,6 +4,7 @@ import asciiPanel.AsciiPanel
 import java.awt.Color
 
 enum class Tile(val glyph: Char, val color: Color) {
+    UNKNOWN(' ', AsciiPanel.white),
     FLOOR(255.toChar(), AsciiPanel.yellow),
     WALL(177.toChar(), AsciiPanel.yellow),
     BOUNDS('x', AsciiPanel.brightBlack),

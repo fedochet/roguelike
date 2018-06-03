@@ -2,7 +2,7 @@ package ru.spbau.mit.roguelike.entities
 
 import ru.spbau.mit.roguelike.Tile
 import ru.spbau.mit.roguelike.util.roundAreaCoordinates
-import ru.spbau.mit.roguelike.world.Line
+import ru.spbau.mit.roguelike.world.FieldOfView
 import ru.spbau.mit.roguelike.world.World
 import java.awt.Color
 
@@ -25,7 +25,11 @@ class MessagesHub {
     fun clear() = _messages.clear()
 }
 
-class PlayerAI(player: Creature, private val messages: MessagesHub): CreatureAI(player) {
+class PlayerAI(
+        player: Creature,
+        private val fieldOfView: FieldOfView,
+        private val messages: MessagesHub): CreatureAI(player) {
+
     init {
         player.ai = this
     }
@@ -46,23 +50,7 @@ class PlayerAI(player: Creature, private val messages: MessagesHub): CreatureAI(
         messages.add(message)
     }
 
-    override fun canSee(wx: Int, wy: Int, wz: Int): Boolean {
-        if (creature.z != wz)
-            return false
-
-        val distanceToCoordinate = (creature.x - wx) * (creature.x - wx) + (creature.y - wy) * (creature.y - wy)
-        if (distanceToCoordinate > creature.visionRadius * creature.visionRadius)
-            return false
-
-        for (p in Line.create(creature.x, creature.y, wx, wy)) {
-            if (creature.tile(p.x, p.y, wz).steppable || (p.x == wx && p.y == wy))
-                continue
-
-            return false
-        }
-
-        return true
-    }
+    override fun canSee(wx: Int, wy: Int, wz: Int) = fieldOfView.isVisible(wx, wy, wz)
 }
 
 class FungusAI(fungus: Creature): DummyAI(fungus)
@@ -160,10 +148,10 @@ class Creature(
 
 class CreatureFactory(private val world: World) {
 
-    fun newPlayer(messages: MessagesHub): Creature {
+    fun newPlayer(fieldOfView: FieldOfView, messages: MessagesHub): Creature {
         val player = Creature(world, '@', Color.WHITE, 100, 20, 5, 9)
         world.addToEmptyLocation(player)
-        PlayerAI(player, messages)
+        PlayerAI(player, fieldOfView, messages)
         return player
     }
 

@@ -5,8 +5,10 @@ import ru.spbau.mit.roguelike.entities.Creature
 import ru.spbau.mit.roguelike.entities.CreatureFactory
 import ru.spbau.mit.roguelike.entities.MessagesHub
 import ru.spbau.mit.roguelike.util.product
+import ru.spbau.mit.roguelike.world.FieldOfView
 import ru.spbau.mit.roguelike.world.World
 import ru.spbau.mit.roguelike.world.WorldBuilder
+import java.awt.Color
 import java.awt.event.KeyEvent
 import java.lang.Math.max
 import java.lang.Math.min
@@ -20,12 +22,13 @@ class PlayScreen : Screen {
     private val screenCoordinates = (0 until screenWidth) product (0 until screenHeight)
 
     private val world: World = WorldBuilder(90, 30, 5).makeCaves().build()
+    private val fieldOfView = FieldOfView(world)
     private val messagesHub = MessagesHub()
     private val player: Creature
 
     init {
         val factory = CreatureFactory(world)
-        player = factory.newPlayer(messagesHub)
+        player = factory.newPlayer(fieldOfView, messagesHub)
         repeat(10) {
             factory.newFungus()
         }
@@ -95,12 +98,16 @@ class PlayScreen : Screen {
     }
 
     private fun displayTiles(terminal: AsciiPanel, left: Int, top: Int) {
+        fieldOfView.update(player.x, player.y, player.z, player.visionRadius);
+
         for ((x, y) in screenCoordinates) {
             val wx = x + left
             val wy = y + top
 
             if (player.canSee(wx, wy, player.z)) {
                 terminal.write(world.getGlyph(wx, wy, player.z), x, y, world.getColor(wx, wy, player.z))
+            } else {
+                terminal.write(fieldOfView.tile(wx, wy, player.z).glyph, x, y, Color.DARK_GRAY)
             }
         }
 
