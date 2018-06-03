@@ -2,12 +2,15 @@ package ru.spbau.mit.roguelike.entities
 
 import ru.spbau.mit.roguelike.Tile
 import ru.spbau.mit.roguelike.util.roundAreaCoordinates
+import ru.spbau.mit.roguelike.world.Line
 import ru.spbau.mit.roguelike.world.World
 import java.awt.Color
+
 
 abstract class CreatureAI(protected val creature: Creature) {
     abstract fun onEnter(x: Int, y: Int, z: Int, tile: Tile)
     open fun onNotify(message: String) {}
+    open fun canSee(wx: Int, wy: Int, wz: Int): Boolean = false
 }
 
 open class DummyAI(creature: Creature) : CreatureAI(creature) {
@@ -42,6 +45,24 @@ class PlayerAI(player: Creature, private val messages: MessagesHub): CreatureAI(
     override fun onNotify(message: String) {
         messages.add(message)
     }
+
+    override fun canSee(wx: Int, wy: Int, wz: Int): Boolean {
+        if (creature.z != wz)
+            return false
+
+        val distanceToCoordinate = (creature.x - wx) * (creature.x - wx) + (creature.y - wy) * (creature.y - wy)
+        if (distanceToCoordinate > creature.visionRadius * creature.visionRadius)
+            return false
+
+        for (p in Line.create(creature.x, creature.y, wx, wy)) {
+            if (creature.tile(p.x, p.y, wz).steppable || (p.x == wx && p.y == wy))
+                continue
+
+            return false
+        }
+
+        return true
+    }
 }
 
 class FungusAI(fungus: Creature): DummyAI(fungus)
@@ -53,14 +74,22 @@ class Creature(
         val maxHp: Int,
         private val attackValue: Int,
         private val defenseValue: Int,
+        val visionRadius: Int,
         var x: Int = 0,
         var y: Int = 0,
         var z: Int = 0) {
 
     var hp = maxHp
-
-
     var ai: CreatureAI = DummyAI(this)
+
+    fun canSee(wx: Int, wy: Int, wz: Int): Boolean {
+        return ai.canSee(wx, wy, wz)
+    }
+
+    fun tile(wx: Int, wy: Int, wz: Int): Tile {
+        return world.getTile(wx, wy, wz)
+    }
+
 
     fun moveBy(mx: Int, my: Int, mz: Int) {
         val nextX = x + mx
@@ -71,16 +100,16 @@ class Creature(
 
         if (mz == -1) {
             if (tile == Tile.STAIRS_DOWN) {
-                doAction("walk up the stairs to level %d", z + mz + 1);
+                doAction("walk up the stairs to level %d", z + mz + 1)
             } else {
-                doAction("try to go up but are stopped by the cave ceiling");
+                doAction("try to go up but are stopped by the cave ceiling")
                 return
             }
         } else if (mz == 1) {
             if (tile == Tile.STAIRS_UP) {
-                doAction("walk down the stairs to level %d", z + mz + 1);
+                doAction("walk down the stairs to level %d", z + mz + 1)
             } else {
-                doAction("try to go down but are stopped by the cave floor");
+                doAction("try to go down but are stopped by the cave floor")
                 return
             }
         }
@@ -132,14 +161,14 @@ class Creature(
 class CreatureFactory(private val world: World) {
 
     fun newPlayer(messages: MessagesHub): Creature {
-        val player = Creature(world, '@', Color.WHITE, 100, 20, 5)
+        val player = Creature(world, '@', Color.WHITE, 100, 20, 5, 9)
         world.addToEmptyLocation(player)
         PlayerAI(player, messages)
         return player
     }
 
     fun newFungus(): Creature {
-        val fungus = Creature(world, 'f', Color.GREEN, 10, 0, 0)
+        val fungus = Creature(world, 'f', Color.GREEN, 10, 0, 0, 0)
         world.addToEmptyLocation(fungus)
         FungusAI(fungus)
         return fungus

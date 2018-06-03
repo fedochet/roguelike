@@ -99,11 +99,13 @@ class PlayScreen : Screen {
             val wx = x + left
             val wy = y + top
 
-            terminal.write(world.getGlyph(wx, wy, player.z), x, y, world.getColor(wx, wy, player.z))
+            if (player.canSee(wx, wy, player.z)) {
+                terminal.write(world.getGlyph(wx, wy, player.z), x, y, world.getColor(wx, wy, player.z))
+            }
         }
 
         for (creature in world.creatures) {
-            if (creature.z == player.z) {
+            if (player.canSee(creature.x, creature.y, creature.z)) {
                 terminal.drawCreature(creature, left, top)
             }
         }
