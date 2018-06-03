@@ -3,14 +3,59 @@ package ru.spbau.mit.roguelike.entities
 import ru.spbau.mit.roguelike.Tile
 import ru.spbau.mit.roguelike.util.roundAreaCoordinates
 import ru.spbau.mit.roguelike.world.FieldOfView
+import ru.spbau.mit.roguelike.world.Line
 import ru.spbau.mit.roguelike.world.World
 import java.awt.Color
 
 
-abstract class CreatureAI(protected val creature: Creature) {
-    abstract fun onEnter(x: Int, y: Int, z: Int, tile: Tile)
+open class CreatureAI(protected var creature: Creature) {
+
+    init {
+        this.creature.ai = this
+    }
+
+    open fun onEnter(x: Int, y: Int, z: Int, tile: Tile) {
+        if (tile.steppable) {
+            creature.x = x
+            creature.y = y
+            creature.z = z
+        } else {
+            creature.doAction("bump into a wall")
+        }
+    }
+
+    open fun onUpdate() {}
+
     open fun onNotify(message: String) {}
-    open fun canSee(wx: Int, wy: Int, wz: Int): Boolean = false
+
+    open fun canSee(wx: Int, wy: Int, wz: Int): Boolean {
+        if (creature.z != wz)
+            return false
+
+        if ((creature.x - wx) * (creature.x - wx) + (creature.y - wy) * (creature.y - wy) > creature.visionRadius * creature.visionRadius)
+            return false
+
+        for (p in Line.create(creature.x, creature.y, wx, wy)) {
+            if (creature.tile(p.x, p.y, wz).steppable || p.x == wx && p.y == wy)
+                continue
+
+            return false
+        }
+
+        return true
+    }
+
+    open fun wander() {
+        val mx = (Math.random() * 3).toInt() - 1
+        val my = (Math.random() * 3).toInt() - 1
+
+        val other = creature.creature(creature.x + mx, creature.y + my, creature.z)
+
+        if (other != null && other.name == creature.name)
+            return
+        else
+            creature.moveBy(mx, my, 0)
+    }
 }
 
 open class DummyAI(creature: Creature) : CreatureAI(creature) {
@@ -43,6 +88,8 @@ class PlayerAI(
             }
 
             tile.diggable -> creature.dig(x, y, z)
+
+            else -> creature.doAction("bumb into wall")
         }
     }
 
@@ -55,8 +102,16 @@ class PlayerAI(
 
 class FungusAI(fungus: Creature): DummyAI(fungus)
 
+class BatAI(bat: Creature): CreatureAI(bat) {
+    override fun onUpdate() {
+        wander()
+        wander()
+    }
+}
+
 class Creature(
         private val world: World,
+        val name: String,
         val glyph: Char,
         val color: Color,
         val maxHp: Int,
@@ -73,11 +128,6 @@ class Creature(
     fun canSee(wx: Int, wy: Int, wz: Int): Boolean {
         return ai.canSee(wx, wy, wz)
     }
-
-    fun tile(wx: Int, wy: Int, wz: Int): Tile {
-        return world.getTile(wx, wy, wz)
-    }
-
 
     fun moveBy(mx: Int, my: Int, mz: Int) {
         val nextX = x + mx
@@ -116,7 +166,7 @@ class Creature(
         amount = (Math.random() * amount).toInt() + 1
         other.modifyHp(-amount)
 
-        doAction("attack the '%s' for %d damage", other.glyph, amount)
+        doAction("attack the '%s' for %d damage", other.name, amount)
     }
 
     fun modifyHp(amount: Int) {
@@ -132,33 +182,47 @@ class Creature(
         ai.onNotify(message.format(*params))
     }
 
+    fun update() {
+        ai.onUpdate()
+    }
+
     fun doAction(message: String, vararg params: Any) {
         for ((ox, oy) in roundAreaCoordinates(radius = 9)) {
             val other = world.getCreatureAt(x + ox, y + oy, z) ?: continue
 
-            when (other) {
-                this -> other.notify("You $message.", *params)
-                else -> other.notify("The '$glyph' $message.", *params)
+            when {
+                other == this -> other.notify("You $message.", *params)
+                other.canSee(x, y, z) -> other.notify("The '$name' $message.", *params)
             }
         }
     }
 
     fun dig(x: Int, y: Int, z: Int) = world.dig(x, y, z)
+
+    fun tile(x: Int, y: Int, z: Int) = world.getTile(x, y, z)
+    fun creature(x: Int, y: Int, z: Int): Creature? = world.getCreatureAt(x, y, z)
 }
 
 class CreatureFactory(private val world: World) {
 
     fun newPlayer(fieldOfView: FieldOfView, messages: MessagesHub): Creature {
-        val player = Creature(world, '@', Color.WHITE, 100, 20, 5, 9)
+        val player = Creature(world, "Player", '@', Color.WHITE, 100, 20, 5, 9)
         world.addToEmptyLocation(player)
         PlayerAI(player, fieldOfView, messages)
         return player
     }
 
     fun newFungus(): Creature {
-        val fungus = Creature(world, 'f', Color.GREEN, 10, 0, 0, 0)
+        val fungus = Creature(world, "Fungus", 'f', Color.GREEN, 10, 0, 0, 0)
         world.addToEmptyLocation(fungus)
         FungusAI(fungus)
         return fungus
+    }
+
+    fun newBat(): Creature {
+        val bat = Creature(world, "Bat", 'b', Color.YELLOW, 15, 5, 0, 0)
+        world.addToEmptyLocation(bat)
+        BatAI(bat)
+        return bat
     }
 }

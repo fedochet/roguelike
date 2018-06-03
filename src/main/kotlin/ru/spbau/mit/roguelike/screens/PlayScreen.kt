@@ -32,6 +32,10 @@ class PlayScreen : Screen {
         repeat(10) {
             factory.newFungus()
         }
+
+        repeat(40) {
+            factory.newBat()
+        }
     }
 
     override fun displayOutput(terminal: AsciiPanel) {
@@ -81,6 +85,8 @@ class PlayScreen : Screen {
             '<' -> player.moveBy(0, 0, -1)
             '>' -> player.moveBy(0, 0, 1)
         }
+
+        world.update()
 
         return when (key.keyCode) {
             KeyEvent.VK_ESCAPE -> LoseScreen()
