@@ -206,22 +206,28 @@ class Creature(
 class CreatureFactory(private val world: World) {
 
     fun newPlayer(fieldOfView: FieldOfView, messages: MessagesHub): Creature {
-        val player = Creature(world, "Player", '@', Color.WHITE, 100, 20, 5, 9)
-        world.addToEmptyLocation(player)
+        val player = Creature(
+                world, "Player", '@', Color.WHITE,
+                maxHp = 10,
+                attackValue = 20,
+                defenseValue = 5,
+                visionRadius = 9
+        )
+        world.addToEmptyLocation(player, 0)
         PlayerAI(player, fieldOfView, messages)
         return player
     }
 
-    fun newFungus(): Creature {
+    fun newFungus(level: Int): Creature {
         val fungus = Creature(world, "Fungus", 'f', Color.GREEN, 10, 0, 0, 0)
-        world.addToEmptyLocation(fungus)
+        world.addToEmptyLocation(fungus, level)
         FungusAI(fungus)
         return fungus
     }
 
-    fun newBat(): Creature {
+    fun newBat(level: Int): Creature {
         val bat = Creature(world, "Bat", 'b', Color.YELLOW, 15, 5, 0, 0)
-        world.addToEmptyLocation(bat)
+        world.addToEmptyLocation(bat, level)
         BatAI(bat)
         return bat
     }

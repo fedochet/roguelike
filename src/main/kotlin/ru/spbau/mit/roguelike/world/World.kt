@@ -23,11 +23,10 @@ class World(private val tiles: Array<Array<Array<Tile>>>) {
         }
     }
 
-    fun addToEmptyLocation(creature: Creature) {
+    fun addToEmptyLocation(creature: Creature, z: Int) {
         while (true) {
             val x = (Math.random() * width).toInt()
             val y = (Math.random() * height).toInt()
-            val z = (Math.random() * depth).toInt()
 
             if (getTile(x, y, z).steppable && getCreatureAt(x, y, z) == null) {
                 creatures.add(creature)

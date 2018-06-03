@@ -29,12 +29,14 @@ class PlayScreen : Screen {
     init {
         val factory = CreatureFactory(world)
         player = factory.newPlayer(fieldOfView, messagesHub)
-        repeat(10) {
-            factory.newFungus()
-        }
 
-        repeat(40) {
-            factory.newBat()
+        repeat(world.depth) { z ->
+            repeat(7) {
+                factory.newFungus(z)
+            }
+            repeat(40) {
+                factory.newBat(z)
+            }
         }
     }
 
@@ -88,6 +90,10 @@ class PlayScreen : Screen {
 
         world.update()
 
+        if (player.hp <= 0) {
+            return LoseScreen()
+        }
+
         return when (key.keyCode) {
             KeyEvent.VK_ESCAPE -> LoseScreen()
             KeyEvent.VK_ENTER -> WinScreen()
@@ -104,7 +110,7 @@ class PlayScreen : Screen {
     }
 
     private fun displayTiles(terminal: AsciiPanel, left: Int, top: Int) {
-        fieldOfView.update(player.x, player.y, player.z, player.visionRadius);
+        fieldOfView.update(player.x, player.y, player.z, player.visionRadius)
 
         for ((x, y) in screenCoordinates) {
             val wx = x + left
