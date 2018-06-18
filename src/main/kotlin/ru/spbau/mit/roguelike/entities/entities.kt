@@ -1,6 +1,6 @@
 package ru.spbau.mit.roguelike.entities
 
-import ru.spbau.mit.roguelike.Tile
+import ru.spbau.mit.roguelike.world.Tile
 import ru.spbau.mit.roguelike.util.roundAreaCoordinates
 import ru.spbau.mit.roguelike.world.FieldOfView
 import ru.spbau.mit.roguelike.world.Item
@@ -9,6 +9,12 @@ import ru.spbau.mit.roguelike.world.World
 import java.awt.Color
 import kotlin.math.min
 
+/**
+ * Represents actor in game world.
+ *
+ * Creature is bound to the [world] it lives in. When it dies (it's [hp] reaches zero), it removes itself from the world
+ * (see [die] method).
+ */
 class Creature(
         private val world: World,
         val name: String,
@@ -22,7 +28,6 @@ class Creature(
     var x: Int = 0
     var y: Int = 0
     var z: Int = 0
-
 
     private var weapon: Item? = null
     private var armor: Item? = null
@@ -143,7 +148,7 @@ class Creature(
         doAction("drop a " + item.name)
         unequip(item)
         inventory.remove(item)
-        world.addAtEmptySpace(item, x, y, z)
+        world.dropAtEmptySpace(item, x, y, z)
     }
 
     private fun die() {
@@ -176,6 +181,11 @@ class Creature(
     fun creature(x: Int, y: Int, z: Int): Creature? = world.getCreatureAt(x, y, z)
 }
 
+/**
+ * Factory class to create creatures and bound them to [world].
+ *
+ * Every created creature is put in the [world] at free random position.
+ */
 class CreatureFactory(private val world: World) {
 
     fun newPlayer(fieldOfView: FieldOfView, messages: MessagesHub): Creature {

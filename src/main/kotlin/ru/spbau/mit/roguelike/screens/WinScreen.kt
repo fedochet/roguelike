@@ -1,10 +1,11 @@
 package ru.spbau.mit.roguelike.screens
 
-import javafx.scene.input.KeyCode.getKeyCode
 import asciiPanel.AsciiPanel
 import java.awt.event.KeyEvent
 
-
+/**
+ * This class represents victory screen that is reached after you complete the game.
+ */
 class WinScreen : Screen {
 
     override fun displayOutput(terminal: AsciiPanel) {

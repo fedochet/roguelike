@@ -4,6 +4,9 @@ import asciiPanel.AsciiPanel
 import java.awt.event.KeyEvent
 
 
+/**
+ * This class represents start screen with some foreword to player. From here player is able to proceed to [PlayScreen].
+ */
 class StartScreen : Screen {
     override fun displayOutput(terminal: AsciiPanel) {
         terminal.write("Welcome to roguelike!", 1, 1)

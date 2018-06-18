@@ -3,6 +3,9 @@ package ru.spbau.mit.roguelike.entities
 import ru.spbau.mit.roguelike.world.Item
 
 
+/**
+ * Class that represents user inventory and may contain [Item]s.
+ */
 class Inventory(max: Int) {
     val items: Array<Item?> = arrayOfNulls(max)
     operator fun get(i: Int): Item? {

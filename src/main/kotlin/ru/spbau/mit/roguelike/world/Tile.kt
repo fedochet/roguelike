@@ -1,8 +1,11 @@
-package ru.spbau.mit.roguelike
+package ru.spbau.mit.roguelike.world
 
 import asciiPanel.AsciiPanel
 import java.awt.Color
 
+/**
+ * This enum represents how does location of the game looks like on ascii screen.
+ */
 enum class Tile(val glyph: Char, val color: Color) {
     UNKNOWN(' ', AsciiPanel.white),
     FLOOR(255.toChar(), AsciiPanel.yellow),

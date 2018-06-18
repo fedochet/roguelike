@@ -1,14 +1,21 @@
 package ru.spbau.mit.roguelike.world
 
-import ru.spbau.mit.roguelike.Tile
-
+/**
+ * Class that represents player's field of view. It helps to show previously seen places as in 'fog of war'.
+ */
 class FieldOfView(private val world: World) {
     private var depth: Int = 0
     private var visible = Array(world.width) { BooleanArray(world.height) { false } }
     private val tiles = Array(world.width) { Array(world.height) { Array(world.depth) { Tile.UNKNOWN } } }
 
+    private val height = world.height
+    private val width = world.width
+
     fun isVisible(x: Int, y: Int, z: Int): Boolean {
-        return z == depth && x >= 0 && y >= 0 && x < visible.size && y < visible[0].size && visible[x][y]
+        return (z == depth)
+            && (x in 0..(width - 1))
+            && (y in 0..(height - 1))
+            && visible[x][y]
     }
 
     fun tile(x: Int, y: Int, z: Int): Tile {

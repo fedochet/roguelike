@@ -1,31 +1,41 @@
 package ru.spbau.mit.roguelike.world
 
-import ru.spbau.mit.roguelike.Tile
-import ru.spbau.mit.roguelike.Tile.BOUNDS
-import ru.spbau.mit.roguelike.Tile.FLOOR
+import ru.spbau.mit.roguelike.world.Tile.BOUNDS
+import ru.spbau.mit.roguelike.world.Tile.FLOOR
 import ru.spbau.mit.roguelike.entities.Creature
 import java.awt.Color
-import java.util.*
 
 
+/**
+ * Class that represents entire game's world. Contains caves and [tiles] for them, also contains [items] and [creatures]
+ * that are located inside this world.
+ */
 class World(private val tiles: Array<Array<Array<Tile>>>) {
     val width = tiles.size
     val height = tiles[0].size
     val depth = tiles[0][0].size
 
-    val items = Array(width) { Array(height) { arrayOfNulls<Item>(depth)}}
-    val creatures: MutableList<Creature> = mutableListOf()
+    private val items = Array(width) { Array(height) { arrayOfNulls<Item>(depth)}}
+    private val creatures: MutableList<Creature> = mutableListOf()
 
+    /**
+     * Returns glyph that should be painted at this position of the world view.
+     */
     fun getGlyph(x: Int, y: Int, z: Int): Char {
         return getCreatureAt(x, y, z)?.glyph
                 ?: getItem(x, y, z)?.glyph
                 ?: getTile(x, y, z).glyph
     }
+
+    /**
+     * Returns color of that position of the world view.
+     */
     fun getColor(x: Int, y: Int, z: Int): Color {
         return getCreatureAt(x, y, z)?.color
                 ?: getItem(x, y, z)?.color
                 ?: getTile(x, y, z).color
     }
+
     fun getItem(x: Int, y: Int, z: Int): Item? = items[x][y][z]
 
     fun getTile(x: Int, y: Int, z: Int) = tiles.getOrNull(x)?.getOrNull(y)?.getOrNull(z) ?: BOUNDS
@@ -77,10 +87,7 @@ class World(private val tiles: Array<Array<Array<Tile>>>) {
         items[x][y][z] = null
     }
 
-    fun addAtEmptySpace(item: Item?, x: Int, y: Int, z: Int) {
-        if (item == null)
-            return
-
+    fun dropAtEmptySpace(item: Item, x: Int, y: Int, z: Int) {
         val points = mutableListOf<Point>()
         val checked = mutableListOf<Point>()
 

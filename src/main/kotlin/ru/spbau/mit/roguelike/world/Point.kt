@@ -4,18 +4,15 @@ import ru.spbau.mit.roguelike.util.squareAreaCoordinates
 import java.util.*
 
 
+/**
+ * Data class that represents a point in 3D-space.
+ */
 data class Point(val x: Int, val y: Int, val z: Int)
 
 fun Point.neighbors8(): MutableList<Point> {
-    val points = ArrayList<Point>()
-
-    for ((ox, oy) in squareAreaCoordinates(radius = 1)) {
-        if (ox == 0 && oy == 0)
-            continue
-
-        points.add(Point(x + ox, y + oy, z))
-    }
-
-    points.shuffle()
-    return points
+    return squareAreaCoordinates(radius = 1)
+            .filter { (ox, oy) -> ox != 0 && oy != 0 }
+            .map { (ox, oy) -> this.copy(x = this.x + ox, y = this.y + oy) }
+            .shuffled()
+            .toMutableList()
 }

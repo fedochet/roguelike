@@ -4,16 +4,26 @@ package ru.spbau.mit.roguelike.world
 import java.awt.*
 import asciiPanel.AsciiPanel
 
-
-
+/**
+ * Data class that represents item in game world.
+ *
+ * Item can be used by [ru.spbau.mit.roguelike.entities.Creature] and can increase its attack or defence values,
+ * or can be eaten and heal it.
+ */
 data class Item(val name: String, val glyph: Char, val color: Color) {
     var attackValue: Int = 0
     var defenseValue: Int = 0
     var foodValue: Int = 0
 }
 
+/**
+ * Special unique item that should be collected in order to win the game.
+ */
 val ZACHETKA = Item("Zachetka", '*', Color.CYAN)
 
+/**
+ * Factory class that can create random items (like sword, potions etc.) in [world] and place it at random places.
+ */
 class StuffFactory(private val world: World) {
     fun newRock(level: Int): Item {
         val item = Item("Rock", '.', Color.YELLOW)

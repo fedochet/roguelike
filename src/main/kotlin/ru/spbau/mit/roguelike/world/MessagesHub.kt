@@ -1,5 +1,9 @@
 package ru.spbau.mit.roguelike.world
 
+/**
+ * A class to store messages collectively
+ * (may be passed to different places, so many can write here and many can read).
+ */
 class MessagesHub: Iterable<String> {
     override fun iterator() = messages.iterator()
 

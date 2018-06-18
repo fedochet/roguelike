@@ -1,8 +1,10 @@
 package ru.spbau.mit.roguelike.world
 
-import ru.spbau.mit.roguelike.Tile
 import java.util.*
 
+/**
+ * Class to create random world with 3D-caves and stairs between levels.
+ */
 class WorldBuilder(private val width: Int, private val height: Int, private val depth: Int) {
     private var tiles: Array<Array<Array<Tile>>>
     private var regions: Array<Array<IntArray>>
@@ -170,8 +172,8 @@ class WorldBuilder(private val width: Int, private val height: Int, private val 
     }
 
     private fun addExitStairs(): WorldBuilder {
-        var x = -1
-        var y = -1
+        var x: Int
+        var y: Int
 
         do {
             x = (Math.random() * width).toInt()

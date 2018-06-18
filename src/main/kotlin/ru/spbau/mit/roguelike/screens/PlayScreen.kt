@@ -1,17 +1,26 @@
 package ru.spbau.mit.roguelike.screens
 
 import asciiPanel.AsciiPanel
-import ru.spbau.mit.roguelike.Tile
+import ru.spbau.mit.roguelike.world.Tile
 import ru.spbau.mit.roguelike.entities.Creature
 import ru.spbau.mit.roguelike.entities.CreatureFactory
+import ru.spbau.mit.roguelike.util.keepInRange
 import ru.spbau.mit.roguelike.util.product
 import ru.spbau.mit.roguelike.world.*
 import java.awt.Color
 import java.awt.event.KeyEvent
-import java.lang.Math.max
-import java.lang.Math.min
 
-
+/**
+ * This is the main class for gameplay process.
+ *
+ * It is aware about [player] character, the [world] that he is playing in, the [messagesHub] to communicate game events
+ * to the screen.
+ *
+ * It has [subscreen] field to hold temporary screens like [EatScreen] or [EquipScreen] and the like.
+ *
+ * On it's creation, it builds the [world] with the [WorldBuilder] and then fills it with [CreatureFactory]
+ * and [StuffFactory].
+ */
 class PlayScreen : Screen {
 
     private var subscreen: Screen? = null
@@ -186,11 +195,4 @@ class PlayScreen : Screen {
         player.moveBy(mx, my, 0)
     }
 
-}
-
-/**
- * @return [this] if it is in range `[from, to]`, or closest to it value from range otherwise.
- */
-private fun Int.keepInRange(from: Int, to: Int): Int {
-    return max(from, min(this, to))
 }

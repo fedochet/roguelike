@@ -1,6 +1,9 @@
 package ru.spbau.mit.roguelike.world
 
-data class Line(val points: List<Point>): Iterable<Point> by points {
+/**
+ * Line object to help with field of view and geometry.
+ */
+data class Line(private val points: List<Point>): Iterable<Point> by points {
 
     companion object {
         fun create(x0: Int, y0: Int, x1: Int, y1: Int): Line {
