@@ -196,21 +196,21 @@ class CreatureFactory(private val world: World) {
                 initialDefenceValue = 5,
                 visionRadius = 9
         )
-        world.addAtEmptyLocation(player, 0)
+        world.addCeatureAtEmptyLocation(player, 0)
         PlayerAI(player, fieldOfView, messages)
         return player
     }
 
     fun newFungus(level: Int): Creature {
         val fungus = Creature(world, "Fungus", 'f', Color.GREEN, 10, 0, 0, 0)
-        world.addAtEmptyLocation(fungus, level)
+        world.addCeatureAtEmptyLocation(fungus, level)
         FungusAI(fungus)
         return fungus
     }
 
     fun newBat(level: Int): Creature {
         val bat = Creature(world, "Bat", 'b', Color.YELLOW, 15, 5, 0, 0)
-        world.addAtEmptyLocation(bat, level)
+        world.addCeatureAtEmptyLocation(bat, level)
         BatAI(bat)
         return bat
     }

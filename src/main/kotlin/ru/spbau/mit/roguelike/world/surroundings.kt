@@ -27,26 +27,26 @@ val ZACHETKA = Item("Zachetka", '*', Color.CYAN)
 class StuffFactory(private val world: World) {
     fun newRock(level: Int): Item {
         val item = Item("Rock", '.', Color.YELLOW)
-        world.addAtEmptyLocation(item, level)
+        world.addItemAtEmptyLocation(item, level)
         return item
     }
 
     fun newVictoryItem(depth: Int): Item {
-        world.addAtEmptyLocation(ZACHETKA, depth)
+        world.addItemAtEmptyLocation(ZACHETKA, depth)
         return ZACHETKA
     }
 
     fun newDagger(depth: Int): Item {
         val item = Item("dagger", ')', AsciiPanel.white)
         item.attackValue += 5
-        world.addAtEmptyLocation(item, depth)
+        world.addItemAtEmptyLocation(item, depth)
         return item
     }
 
     fun newSword(depth: Int): Item {
         val item = Item("sword", ')', AsciiPanel.brightWhite)
         item.attackValue += 10
-        world.addAtEmptyLocation(item, depth)
+        world.addItemAtEmptyLocation(item, depth)
         return item
     }
 
@@ -54,28 +54,28 @@ class StuffFactory(private val world: World) {
         val item = Item("staff", ')', AsciiPanel.yellow)
         item.attackValue += 5
         item.defenseValue += 3
-        world.addAtEmptyLocation(item, depth)
+        world.addItemAtEmptyLocation(item, depth)
         return item
     }
 
     fun newLightArmor(depth: Int): Item {
         val item = Item("tunic", '[', AsciiPanel.green)
         item.defenseValue += (2)
-        world.addAtEmptyLocation(item, depth)
+        world.addItemAtEmptyLocation(item, depth)
         return item
     }
 
     fun newMediumArmor(depth: Int): Item {
         val item = Item("chainmail", '[', AsciiPanel.white)
         item.defenseValue += 4
-        world.addAtEmptyLocation(item, depth)
+        world.addItemAtEmptyLocation(item, depth)
         return item
     }
 
     fun newHeavyArmor(depth: Int): Item {
         val item = Item("platemail", '[', AsciiPanel.brightWhite)
         item.defenseValue += 6
-        world.addAtEmptyLocation(item, depth)
+        world.addItemAtEmptyLocation(item, depth)
         return item
     }
 
@@ -90,7 +90,7 @@ class StuffFactory(private val world: World) {
     fun newPotion(depth: Int): Item {
         val potion = Item("health potion", '&', AsciiPanel.brightRed)
         potion.foodValue += 10
-        world.addAtEmptyLocation(potion, depth)
+        world.addItemAtEmptyLocation(potion, depth)
         return potion
     }
 

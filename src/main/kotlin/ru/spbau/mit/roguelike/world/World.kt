@@ -46,7 +46,7 @@ class World(private val tiles: Array<Array<Array<Tile>>>) {
         }
     }
 
-    fun addAtEmptyLocation(creature: Creature, z: Int) {
+    fun addCeatureAtEmptyLocation(creature: Creature, z: Int) {
         while (true) {
             val x = (Math.random() * width).toInt()
             val y = (Math.random() * height).toInt()
@@ -61,7 +61,7 @@ class World(private val tiles: Array<Array<Array<Tile>>>) {
         }
     }
 
-    fun addAtEmptyLocation(item: Item, z: Int) {
+    fun addItemAtEmptyLocation(item: Item, z: Int) {
         while (true) {
             val x = (Math.random() * width).toInt()
             val y = (Math.random() * height).toInt()
